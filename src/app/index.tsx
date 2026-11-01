@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -154,6 +154,32 @@ export default function HomeScreen() {
         [turnoMeta]: valor,
       },
     }));
+  }
+
+  function apagarDados() {
+    Alert.alert(
+      'Apagar todos os dados?',
+      'Esta ação remove todos os apontamentos e metas salvos neste aparelho e não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Apagar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem(STORAGE_KEY);
+              setRegistros([]);
+              setMetasPorData({});
+              setQuantidadesTexto(criarQuantidadesTexto());
+              setJustificativa('');
+              Alert.alert('Dados apagados', 'Os apontamentos e metas locais foram removidos.');
+            } catch {
+              Alert.alert('Erro', 'Não foi possível apagar os dados deste aparelho.');
+            }
+          },
+        },
+      ],
+    );
   }
 
   function salvarApontamento() {
@@ -371,6 +397,9 @@ export default function HomeScreen() {
 
       <View style={styles.cartao}>
         <Text style={styles.tituloSecao}>Apontamentos recentes</Text>
+        <Pressable style={styles.botaoApagar} onPress={apagarDados}>
+          <Text style={styles.textoBotaoApagar}>Apagar todos os apontamentos e metas</Text>
+        </Pressable>
         {registrosDoDia.length === 0 ? (
           <Text style={styles.ajuda}>Ainda não há registros para esta data.</Text>
         ) : (
@@ -470,6 +499,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#126b52',
   },
   textoBotao: { color: '#fff', fontSize: 14, fontWeight: '800' },
+  botaoApagar: {
+    minHeight: 44,
+    marginBottom: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff1ef',
+    borderWidth: 1,
+    borderColor: '#f0c9c4',
+  },
+  textoBotaoApagar: { color: '#a3332b', fontSize: 12, fontWeight: '800' },
   metaCartao: { marginBottom: 9, padding: 12, borderRadius: 12, backgroundColor: '#f5f8f5' },
   linhaEntre: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   numeroTurno: { color: '#126b52', fontSize: 15, fontWeight: '800' },
